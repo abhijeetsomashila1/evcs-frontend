@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Menu, X, User, Clock, Home } from 'lucide-react';
+import { Menu, X, User, Clock, Home, LogOut } from 'lucide-react';
 
 export default function AppLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,6 +10,13 @@ export default function AppLayout() {
 
   const navigateTo = (path: string) => {
     navigate(path);
+    setIsMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('token'); // Clear token if any
+    navigate('/login');
     setIsMenuOpen(false);
   };
 
@@ -47,6 +54,10 @@ export default function AppLayout() {
           <button onClick={() => navigateTo('/history')} className="w-full text-left px-4 py-3 text-lg font-semibold text-gray-800 hover:bg-gray-100 rounded-lg flex items-center">
             <Clock size={20} className="mr-3" /> Charging History
           </button>
+          <div className="border-t border-gray-100 my-2"></div>
+          <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-lg font-semibold text-red-600 hover:bg-red-50 rounded-lg flex items-center">
+            <LogOut size={20} className="mr-3" /> Logout
+          </button
         </nav>
       </div>
 
