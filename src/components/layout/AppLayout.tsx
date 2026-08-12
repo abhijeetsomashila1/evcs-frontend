@@ -57,7 +57,7 @@ export default function AppLayout() {
           <div className="border-t border-gray-100 my-2"></div>
           <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-lg font-semibold text-red-600 hover:bg-red-50 rounded-lg flex items-center">
             <LogOut size={20} className="mr-3" /> Logout
-          </button
+          </button>
         </nav>
       </div>
 
