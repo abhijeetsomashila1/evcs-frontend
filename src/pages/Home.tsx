@@ -13,6 +13,11 @@ export default function Home() {
   const { currentSessionId, setCurrentSession, sessionStartTime, chargingAmount } = useChargerStore();
   const isCharging = currentSessionId !== null;
 
+  // On page load / refresh, reset the relay to OFF
+  useEffect(() => {
+    fetch('/api/session/reset', { method: 'POST' }).catch(() => {});
+  }, []);
+
   // Estimate charging time: 1 unit = 12 minutes
   const minsPerUnit = 12; 
   
