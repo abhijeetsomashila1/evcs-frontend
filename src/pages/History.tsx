@@ -1,4 +1,4 @@
-import { Clock, Zap, CheckCircle2, BatteryCharging, Calendar, MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { Clock, Zap, CheckCircle2, Calendar, MapPin, Loader2, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
 
@@ -16,17 +16,7 @@ export default function History() {
     return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   };
 
-  // Helper to calculate total time charged
-  const calculateDuration = (start: string, end: string) => {
-    if (!start || !end) return 'Running...';
-    const diffMs = new Date(end).getTime() - new Date(start).getTime();
-    if (diffMs < 0) return 'Unknown';
-    const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 60) return `${diffMins} min`;
-    const hrs = Math.floor(diffMins / 60);
-    const mins = diffMins % 60;
-    return `${hrs}h ${mins}m`;
-  };
+
 
   return (
     <div className="flex-1 flex flex-col items-center justify-start p-4 w-full">
