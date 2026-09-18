@@ -28,46 +28,43 @@ export default function Home() {
   const minsPreview = totalMinsPreview % 60;
   const timeStringPreview = hoursPreview > 0 ? `${hoursPreview}h ${minsPreview}m` : `${minsPreview} min`;
 
-  // Progress Bar Logic (Real-time sync with backend)
+  // Timer-based countdown and auto-stop
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
 
     if (isCharging && sessionStartTime && chargingAmount) {
-      interval = setInterval(async () => {
-        try {
-          const res = await fetch('/api/pzem/latest');
-          if (res.ok) {
-            const data = await res.json();
-            const currentUnits = (data.energy_Wh || 0) / 1000.0;
-            
-            // Calculate Percentage based on actual energy
-            let percent = (currentUnits / chargingAmount) * 100;
-            if (percent > 100) percent = 100;
-            setProgress(percent);
+      const totalSeconds = chargingAmount * minsPerUnit * 60;
 
-            // Estimate Time Remaining
-            const totalSeconds = chargingAmount * minsPerUnit * 60;
-            const elapsedSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
-            
-            if (percent >= 100) {
-              setTimeRemaining(`0s remaining`);
-            } else {
-              const remainingSeconds = Math.max(totalSeconds - elapsedSeconds, 0);
-              const rHours = Math.floor(remainingSeconds / 3600);
-              const rMins = Math.floor((remainingSeconds % 3600) / 60);
-              const rSecs = remainingSeconds % 60;
-              
-              if (rHours > 0) {
-                setTimeRemaining(`${rHours}h ${rMins}m remaining`);
-              } else if (rMins > 0) {
-                setTimeRemaining(`${rMins}m ${rSecs}s remaining`);
-              } else {
-                setTimeRemaining(`${rSecs}s remaining`);
-              }
-            }
+      interval = setInterval(() => {
+        const elapsedSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
+        const remainingSeconds = Math.max(totalSeconds - elapsedSeconds, 0);
+
+        // Update progress bar
+        let percent = (elapsedSeconds / totalSeconds) * 100;
+        if (percent > 100) percent = 100;
+        setProgress(percent);
+
+        // Update time remaining display
+        if (remainingSeconds <= 0) {
+          setTimeRemaining('0s remaining');
+          setProgress(100);
+
+          // Timer reached 0 — auto-stop: call evoff
+          fetch('/api/session/stop', { method: 'POST' }).catch(() => {});
+          setCurrentSession(null);
+          clearInterval(interval);
+        } else {
+          const rHours = Math.floor(remainingSeconds / 3600);
+          const rMins = Math.floor((remainingSeconds % 3600) / 60);
+          const rSecs = remainingSeconds % 60;
+
+          if (rHours > 0) {
+            setTimeRemaining(`${rHours}h ${rMins}m remaining`);
+          } else if (rMins > 0) {
+            setTimeRemaining(`${rMins}m ${rSecs}s remaining`);
+          } else {
+            setTimeRemaining(`${rSecs}s remaining`);
           }
-        } catch (err) {
-          console.error("Failed to fetch latest energy:", err);
         }
       }, 1000);
     } else {
